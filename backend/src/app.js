@@ -3,6 +3,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
+import cors from 'cors';
 
 import { env } from './config/env.js';
 import routes from './routes/index.js';
@@ -13,6 +14,12 @@ const app = express();
 
 // ─── Security ───────────────────────────────────────────────────────────────
 app.use(helmet());
+app.use(cors({
+  origin: env.CLIENT_ORIGIN,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
 // ─── Rate Limiting ───────────────────────────────────────────────────────────
 const limiter = rateLimit({
