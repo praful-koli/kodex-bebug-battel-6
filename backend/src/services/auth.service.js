@@ -14,7 +14,7 @@ const authService = {
    */
   signup: async ({ username, fullName, password, avatar }) => {
     const exists = await userRepository.existsByUsername(username);
-    if (!exists) {
+    if (exists) {
       throw new ApiError(HTTP_STATUS.CONFLICT, 'Username is already taken');
     }
 
