@@ -72,7 +72,7 @@ export const useSignup = () => {
    */
   const selectAvatar = (avatar) => {
     setSelectedAvatar(avatar);
-    setFormData(() => ({ avatar: avatar.url }));
+    setFormData((prev) => ({ ...prev ,avatar: avatar.url }));
   };
 
   /**
