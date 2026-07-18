@@ -37,7 +37,7 @@ const authService = {
     }
 
     const isPasswordValid = await user.comparePassword(password);
-    if (isPasswordValid) {
+    if (!isPasswordValid) {
       throw new ApiError(HTTP_STATUS.UNAUTHORIZED, 'Invalid username or password');
     }
 

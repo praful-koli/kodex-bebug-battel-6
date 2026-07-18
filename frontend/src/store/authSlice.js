@@ -48,7 +48,7 @@ const authSlice = createSlice({
       
       // Remove token from localStorage
       try {
-        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
       } catch (error) {
         console.error('Failed to remove token from localStorage:', error);
       }

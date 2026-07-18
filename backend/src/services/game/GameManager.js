@@ -77,6 +77,10 @@ class GameManager {
     const isPlayerX = game.playerX._id.toString() === userId.toString();
     const isPlayerO = game.playerO._id.toString() === userId.toString();
 
+    const isUsersTurn =
+      (game.isXTurn && isPlayerX) || (!game.isXTurn && isPlayerO);
+    if (!isUsersTurn) return null;
+
     // Apply mark
     const mark = game.isXTurn ? 'X' : 'O';
     game.board[cellIndex] = mark;
@@ -132,6 +136,7 @@ class GameManager {
         }
       }
     } else {
+       game.isXTurn = !game.isXTurn;
     }
 
     return { game, roundEnded, matchEnded, finalWinner };
@@ -146,6 +151,7 @@ class GameManager {
 
     game.board = Array(9).fill(null);
     game.roundWinner = null;
+    game.winCombo = null;
     game.isXTurn = startingMark === 'X';
 
     return game;

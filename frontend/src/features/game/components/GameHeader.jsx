@@ -435,7 +435,7 @@ const GameHeader = () => {
           <div className="flex gap-2 justify-end">
             <button
               onClick={() => {
-                handleRespondInvite(invite._id, 'accept');
+                handleRespondInvite(invite._id, 'reject');
                 toast.dismiss(t);
               }}
               className="px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-muted text-muted-foreground transition-colors cursor-pointer"
@@ -444,7 +444,7 @@ const GameHeader = () => {
             </button>
             <button
               onClick={() => {
-                handleRespondInvite(invite._id, 'reject');
+                handleRespondInvite(invite._id, 'accept');
                 toast.dismiss(t);
               }}
               className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer"

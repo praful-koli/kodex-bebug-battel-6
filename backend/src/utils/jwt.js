@@ -19,5 +19,5 @@ export const signAccessToken = (payload) => {
  * @throws {JsonWebTokenError | TokenExpiredError}
  */
 export const verifyAccessToken = (token) => {
-  return jwt.verify(token, env.JWT_ACCES_SECRET);
+  return jwt.verify(token, env.JWT_ACCESS_SECRET);
 };

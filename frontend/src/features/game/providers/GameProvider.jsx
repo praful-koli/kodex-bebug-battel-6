@@ -1,13 +1,20 @@
-import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
-import { useSocket } from '@/providers/SocketProvider';
-import gameApi from '../api/game.api';
-import { toast } from 'sonner';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+} from "react";
+import { useSocket } from "@/providers/SocketProvider";
+import gameApi from "../api/game.api";
+import { toast } from "sonner";
 
-import { registerConnectionEvents } from '../socket/events/connection.events';
-import { registerRoomEvents } from '../socket/events/room.events';
-import { registerGameEvents } from '../socket/events/game.events';
-import { registerPlayerEvents } from '../socket/events/player.events';
-import { registerNotificationEvents } from '../socket/events/notification.events';
+import { registerConnectionEvents } from "../socket/events/connection.events";
+import { registerRoomEvents } from "../socket/events/room.events";
+import { registerGameEvents } from "../socket/events/game.events";
+import { registerPlayerEvents } from "../socket/events/player.events";
+import { registerNotificationEvents } from "../socket/events/notification.events";
 
 const GameContext = createContext(null);
 
@@ -28,7 +35,7 @@ export const GameProvider = ({ children, onGameExit }) => {
       const res = await gameApi.getActiveMatch();
       const activeMatch = res.data.data;
       if (!activeMatch) {
-        toast.error('No active match session found.');
+        toast.error("No active match session found.");
         onGameExit();
         return null;
       }
@@ -36,50 +43,53 @@ export const GameProvider = ({ children, onGameExit }) => {
       connectionManager.setActiveRoom(activeMatch._id);
       return activeMatch;
     } catch (err) {
-      console.error('Failed to sync game state:', err);
-      toast.error('Failed to fetch active match details.');
+      console.error("Failed to sync game state:", err);
+      toast.error("Failed to fetch active match details.");
       onGameExit();
       return null;
     }
   }, [onGameExit, connectionManager]);
 
   // Handle make move (with Optimistic UI rollback support)
-  const makeMove = useCallback((cellIndex) => {
-    if (!match || match.board[cellIndex] || match.roundWinner) return;
+  const makeMove = useCallback(
+    (cellIndex) => {
+      if (!match || match.board[cellIndex] || match.roundWinner) return;
 
-    // 1. Snapshot old state for rollback
-    const rollbackState = { ...match };
+      // 1. Snapshot old state for rollback
+      const rollbackState = { ...match };
 
-    // 2. Apply optimistic update
-    setMatch((prev) => {
-      if (!prev) return null;
-      const newBoard = [...prev.board];
-      newBoard[cellIndex] = prev.isXTurn ? 'O' : 'X';
-      return {
-        ...prev,
-        board: newBoard,
-        isXTurn: prev.isXTurn,
-      };
-    });
+      // 2. Apply optimistic update
+      setMatch((prev) => {
+        if (!prev) return null;
+        const newBoard = [...prev.board];
+        newBoard[cellIndex] = prev.isXTurn ? "X" : "O";
+        return {
+          ...prev,
+          board: newBoard,
+          isXTurn: !prev.isXTurn,
+        };
+      });
 
-    // 3. Emit move to backend
-    const sent = connectionManager.emit('make-move', { cellIndex });
-    if (!sent) {
-      // Rollback immediately if socket is not connected
-      setMatch(rollbackState);
-      toast.error('Move failed: connection lost');
-    }
-  }, [match, connectionManager]);
+      // 3. Emit move to backend
+      const sent = connectionManager.emit("make-move", { cellIndex });
+      if (!sent) {
+        // Rollback immediately if socket is not connected
+        setMatch(rollbackState);
+        toast.error("Move failed: connection lost");
+      }
+    },
+    [match, connectionManager],
+  );
 
   const leaveMatch = useCallback(async () => {
     setLeaving(true);
     try {
-      connectionManager.emit('leave-match');
+      connectionManager.emit("leave-match");
       await gameApi.leave();
-      toast.success('Left match successfully');
+      toast.success("Left match successfully");
       onGameExit();
     } catch (e) {
-      toast.error('Failed to leave match session');
+      toast.error("Failed to leave match session");
     } finally {
       setLeaving(false);
     }
@@ -96,7 +106,7 @@ export const GameProvider = ({ children, onGameExit }) => {
       setLoading(false);
 
       // Join room in Socket.io
-      connectionManager.emit('join-match', { matchId: activeMatch._id });
+      connectionManager.emit("join-match", { matchId: activeMatch._id });
 
       // Bind all registry modules
       const unsubConnection = registerConnectionEvents(connectionManager, {
@@ -115,7 +125,7 @@ export const GameProvider = ({ children, onGameExit }) => {
 
       const unsubGame = registerGameEvents(connectionManager, {
         onMatchUpdate: (updatedMatch) => {
-
+          setMatch(updatedMatch);
           if (!updatedMatch.roundWinner) {
             setCountdown(null);
             if (countdownIntervalRef.current) {
@@ -163,7 +173,13 @@ export const GameProvider = ({ children, onGameExit }) => {
         },
       });
 
-      unsubs = [unsubConnection, unsubRoom, unsubGame, unsubPlayer, unsubNotification];
+      unsubs = [
+        unsubConnection,
+        unsubRoom,
+        unsubGame,
+        unsubPlayer,
+        unsubNotification,
+      ];
     };
 
     initialize();
@@ -199,7 +215,7 @@ export const GameProvider = ({ children, onGameExit }) => {
 export const useGame = () => {
   const context = useContext(GameContext);
   if (!context) {
-    throw new Error('useGame must be used within a GameProvider');
+    throw new Error("useGame must be used within a GameProvider");
   }
   return context;
 };

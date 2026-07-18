@@ -4,7 +4,7 @@ import 'dotenv/config';
  * Centralized, validated environment configuration.
  * The app will throw at startup if any required variable is missing.
  */
-const getEnv = (key, fallback) => {
+let getEnv = (key, fallback) => {
   const value = process.env[key] || fallback;
   if (value === undefined) {
     throw new Error(`Missing required environment variable: ${key}`);

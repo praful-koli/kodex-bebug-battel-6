@@ -105,7 +105,7 @@ const friendshipService = {
         username: userJson.username,
         fullName: userJson.fullName,
         avatar: userJson.avatar,
-        online: false,
+        online: Boolean(isOnline),
         activity: userJson.activity || 'idle',
       };
     });
