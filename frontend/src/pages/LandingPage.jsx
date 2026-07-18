@@ -9,7 +9,7 @@ const LandingPage = () => {
   const screenSize = useScreenSize();
 
   const handleGetStarted = () => {
-    navigate('/auth/signup');
+    navigate('/signup');
   };
 
   return (
