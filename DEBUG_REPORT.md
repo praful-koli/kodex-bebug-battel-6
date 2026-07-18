@@ -45,7 +45,7 @@ navigate(ROUTES.SIGNUP);
 
 ### Status
 
-Identified and documented; not fixed yet.
+Fixed and verified.
 
 ## Bug 2: Selecting an avatar deletes signup form data
 
@@ -97,7 +97,7 @@ Function: selectAvatar
 
 ### Status
 
-Identified and documented; not fixed yet.
+Fixed and verified.
 
 ## Bug 3: Signup existing-user condition is reversed
 
@@ -150,7 +150,7 @@ Function: signup
 
 ### Status
 
-Identified and documented; not fixed yet.
+Fixed and verified.
 
 ## Bug 4: Stale unique email index prevents additional signups
 
@@ -318,3 +318,288 @@ Function: resetRound
 ### Status
 
 Fixed and verified.
+
+## Bug 7: Correct passwords are rejected during login
+
+### Error
+
+Valid credentials return `Invalid username or password`.
+
+### Root cause
+
+The login service threw the unauthorized error when `comparePassword()` returned `true`.
+
+### Solution
+
+Negated the condition so only an invalid password is rejected:
+
+```js
+if (!isPasswordValid) {
+  throw new ApiError(HTTP_STATUS.UNAUTHORIZED, 'Invalid username or password');
+}
+```
+
+### Solution location
+
+```text
+backend/src/services/auth.service.js:40
+```
+
+### Status
+
+Fixed and verified.
+
+## Bug 8: Every protected request reports an invalid JWT
+
+### Error
+
+Protected API requests return HTTP `401` with `Invalid token` immediately after authentication.
+
+### Root cause
+
+Tokens were signed with `env.JWT_ACCESS_SECRET` but verified using the misspelled property `env.JWT_ACCES_SECRET`, whose value was undefined.
+
+### Solution
+
+Use the same secret for signing and verification:
+
+```js
+return jwt.verify(token, env.JWT_ACCESS_SECRET);
+```
+
+### Solution location
+
+```text
+backend/src/utils/jwt.js:22
+```
+
+### Status
+
+Fixed and verified.
+
+## Bug 9: Invalid access token remains after logout or HTTP 401
+
+### Error
+
+The browser repeatedly sends an old invalid token after credentials are cleared.
+
+### Root cause
+
+The token was stored under `accessToken`, but `clearCredentials` removed the unrelated key `token`.
+
+### Solution
+
+Remove the correct local-storage key:
+
+```js
+localStorage.removeItem('accessToken');
+```
+
+### Solution location
+
+```text
+frontend/src/store/authSlice.js:51
+```
+
+### Status
+
+Fixed and verified.
+
+## Bug 10: All friends appear offline
+
+### Error
+
+The friends panel and online-game modal display active users as offline.
+
+### Root cause
+
+The backend calculated a dynamic `isOnline` value from `lastActive` but returned a hardcoded `online: false` value.
+
+### Solution
+
+Return the calculated value:
+
+```js
+online: Boolean(isOnline),
+```
+
+### Solution location
+
+```text
+backend/src/services/friendship.service.js:108
+```
+
+### Status
+
+Fixed and verified.
+
+## Bug 11: Every game invitation reports that the player is offline
+
+### Error
+
+`POST /api/game/invite` always returns `Player is offline and cannot accept invitations`.
+
+### Root cause
+
+The invitation service calculated `isReceiverOnline` but threw the offline error unconditionally.
+
+### Solution
+
+Throw only when the receiver is actually offline:
+
+```js
+if (!isReceiverOnline) {
+  throw new ApiError(
+    HTTP_STATUS.BAD_REQUEST,
+    'Player is offline and cannot accept invitations'
+  );
+}
+```
+
+### Solution location
+
+```text
+backend/src/services/gameInvite.service.js:46
+```
+
+### Status
+
+Fixed and verified.
+
+## Bug 12: Pending invitations are rejected as inactive
+
+### Error
+
+Responding to a new invitation returns `Invitation not found or no longer active`.
+
+### Root cause
+
+The response service required a new invitation to already have status `accepted`, although invitations are created with status `pending`.
+
+### Solution
+
+Validate against the pending status:
+
+```js
+if (!invite || invite.status !== 'pending') {
+  throw new ApiError(
+    HTTP_STATUS.NOT_FOUND,
+    'Invitation not found or no longer active'
+  );
+}
+```
+
+### Solution location
+
+```text
+backend/src/services/gameInvite.service.js:84
+```
+
+### Status
+
+Fixed and verified.
+
+## Bug 13: Invitation Accept and Decline actions are reversed
+
+### Error
+
+Clicking **Accept** sends a reject action, while clicking **Decline** sends an accept action.
+
+### Root cause
+
+The two button handlers passed opposite action strings.
+
+### Solution
+
+Corrected both handlers:
+
+```js
+// Decline
+handleRespondInvite(invite._id, 'reject');
+
+// Accept
+handleRespondInvite(invite._id, 'accept');
+```
+
+### Solution locations
+
+```text
+frontend/src/features/game/components/GameHeader.jsx:438
+frontend/src/features/game/components/GameHeader.jsx:447
+```
+
+### Status
+
+Fixed and verified.
+
+## Bug 14: MongoDB Atlas DNS failure silently redirects data to local MongoDB
+
+### Error
+
+The backend prints `Primary MongoDB connection failed` and stores users in local database `xogame` instead of Atlas.
+
+### Root cause
+
+Node.js could not resolve the Atlas SRV record through the system DNS resolver. A direct connection test succeeded when using Google DNS.
+
+### Solution
+
+Configured Node's DNS resolver before connecting with Mongoose:
+
+```js
+dns.setServers(['8.8.8.8', '8.8.4.4']);
+```
+
+### Solution location
+
+```text
+backend/src/config/db.js:7
+```
+
+### Verification
+
+The backend connected to an Atlas shard and selected the configured Atlas database.
+
+### Status
+
+Fixed and verified.
+
+## Bug 15: Production frontend cannot reach the API, Socket.IO, or client-side routes
+
+### Error
+
+A Vercel deployment would send `/api` and Socket.IO traffic to the Vercel frontend origin. Directly opening routes such as `/login` or `/dashboard` could also return a Vercel 404, and the Render API did not enable HTTP CORS.
+
+### Root cause
+
+- `/api` depended on the development-only Vite proxy.
+- Socket.IO used `window.location.origin` outside localhost.
+- The Vite SPA had no Vercel fallback rewrite.
+- Express did not install its existing `cors` dependency as middleware.
+
+### Solution
+
+- Added production API and socket URLs with `VITE_API_BASE_URL` and `VITE_SOCKET_URL` overrides.
+- Updated Socket.IO to use the shared `SOCKET_URL` configuration.
+- Added `frontend/vercel.json` to rewrite SPA routes to `index.html`.
+- Added Express CORS using `env.CLIENT_ORIGIN`.
+
+### Solution locations
+
+```text
+frontend/src/config/index.js:2
+frontend/src/lib/socket.js:2
+frontend/vercel.json
+backend/src/app.js:17
+```
+
+### Verification
+
+- Frontend production build completed successfully.
+- Frontend and backend syntax checks passed.
+- `vercel.json` parsed successfully.
+- The production bundle contains the Render backend URL.
+
+### Status
+
+Fixed and verified. Render still requires CLIENT_ORIGIN to be set to the final Vercel URL.
