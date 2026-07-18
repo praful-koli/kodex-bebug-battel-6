@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+/* ─── Light theme (only theme) ─────────────────────────────────────────── */
+:root {
+  /* Primary - Graphite/Rust orange */
+  --primary: #c97559;
+  --primary-foreground: #ffffff;
+  
+  /* Secondary - Light beige/tan */
+  --secondary: #e8dfd6;
+  --secondary-foreground: #1a1816;
+  
+  /* Accent - Cream */
+  --accent: #f0ebe5;
+  --accent-foreground: #1a1816;
+  
+  /* Muted - Soft beige */
+  --muted: #f5f2ee;
+  --muted-foreground: #6b6460;
+  
+  /* Destructive - Black */
+  --destructive: #1a1816;
+  --destructive-foreground: #ffffff;
+  
+  /* Border - Light gray */
+  --border: #e5e0db;
+  
+  /* Input */
+  --input: #e5e0db;
+  
+  /* Ring - Primary color */
+  --ring: #c97559;
+  
+  /* Card */
+  --card: #ffffff;
+  --card-foreground: #1a1816;
+  
+  /* Popover */
+  --popover: #ffffff;
+  --popover-foreground: #1a1816;
+  
+  /* Background - Off-white/cream */
+  --background: #faf8f6;
+  --foreground: #1a1816;
+  
+  /* Radius */
+  --radius: 0.5rem;
+  
+  /* Chart colors */
+  --chart-1: #c97559;
+  --chart-2: #a8674f;
+  --chart-3: #8a5945;
+  --chart-4: #6b4b3b;
+  --chart-5: #4d3d31;
+  
+  /* Font families */
+  --font-sans: DM Sans, ui-sans-serif, sans-serif, system-ui;
+  --font-mono: Geist Mono, ui-monospace, monospace;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+/* ─── Tailwind v4 theme — maps CSS variables to utility classes ─────────── */
+@theme inline {
+  --color-card: var(--card);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-border: var(--border);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-popover: var(--popover);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-destructive: var(--destructive);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* ─── Base styles ────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Smooth focus ring */
+  *:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--background);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+  }
+}
+
