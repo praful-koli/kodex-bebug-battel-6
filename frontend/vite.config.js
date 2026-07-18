@@ -22,7 +22,7 @@ export default defineConfig({
     strictPort: false,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://kodex-bebug-battel-6.onrender.com',
         changeOrigin: true,
       },
     },
