@@ -28,7 +28,7 @@ const SignupPage = () => {
               to={ROUTES.LOGIN}
               className="font-medium text-primary hover:underline transition-colors"
             >
-              Sign in
+              Login
             </Link>
           </p>
         </motion.div>
